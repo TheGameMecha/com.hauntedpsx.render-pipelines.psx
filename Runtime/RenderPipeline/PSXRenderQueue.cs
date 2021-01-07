@@ -15,6 +15,14 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
 
         public enum Priority
         {
+            FPSOpaque = 4000,
+            FPSOpaqueAlphaTest = FPSOpaque + 450,
+            FPSOpaqueLast = FPSOpaque + 500,
+
+            FPSTransparentFirst = FPSOpaque + 500 + 1,
+            FPSTransparent = FPSOpaque + 500 + 1 + k_TransparentPriorityQueueRange,
+            FPSTransparentLast = FPSOpaque + 500 + 1 + k_TransparentPriorityQueueRange * 2, 
+
             BackgroundOpaque = UnityEngine.Rendering.RenderQueue.Background, // 1000
             BackgroundOpaqueAlphaTest = UnityEngine.Rendering.RenderQueue.Background + 450, // 1000 + 450 = 1450
             BackgroundOpaqueLast = UnityEngine.Rendering.RenderQueue.Background + 500, // 1000 + 500 = 1500
@@ -43,6 +51,10 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
 
         public enum RenderQueueType
         {
+            // FPS "Layer"
+            FPSOpaque,
+            FPSTransparent,
+
             // Background "Layer"
             BackgroundOpaque,
             BackgroundTransparent,
@@ -57,6 +69,11 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
 
             Unknown
         }
+
+        public static readonly RenderQueueRange k_RenderQueue_FPSOpaqueNoAlphaTest = new RenderQueueRange { lowerBound = (int)Priority.FPSOpaque, upperBound = (int)Priority.FPSOpaqueAlphaTest - 1 };
+        public static readonly RenderQueueRange k_RenderQueue_FPSAlphaTest = new RenderQueueRange { lowerBound = (int)Priority.FPSOpaqueAlphaTest, upperBound = (int)Priority.FPSOpaqueLast };
+        public static readonly RenderQueueRange k_RenderQueue_FPSAllOpaque = new RenderQueueRange { lowerBound = (int)Priority.FPSOpaque, upperBound = (int)Priority.FPSOpaqueLast };
+        public static readonly RenderQueueRange k_RenderQueue_FPSTransparent = new RenderQueueRange { lowerBound = (int)Priority.FPSTransparentFirst, upperBound = (int)Priority.FPSTransparentLast };
 
         public static readonly RenderQueueRange k_RenderQueue_BackgroundOpaqueNoAlphaTest = new RenderQueueRange { lowerBound = (int)Priority.BackgroundOpaque, upperBound = (int)Priority.BackgroundOpaqueAlphaTest - 1 };
         public static readonly RenderQueueRange k_RenderQueue_BackgroundAlphaTest = new RenderQueueRange { lowerBound = (int)Priority.BackgroundOpaqueAlphaTest, upperBound = (int)Priority.BackgroundOpaqueLast };
@@ -81,6 +98,9 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
 
         public static RenderQueueType GetTypeByRenderQueueValue(int renderQueue)
         {
+            if (k_RenderQueue_FPSAllOpaque.Contains(renderQueue)) { return RenderQueueType.FPSOpaque; }
+            if (k_RenderQueue_FPSTransparent.Contains(renderQueue)) { return RenderQueueType.FPSTransparent; }
+
             if (k_RenderQueue_BackgroundAllOpaque.Contains(renderQueue)) { return RenderQueueType.BackgroundOpaque; }
             if (k_RenderQueue_BackgroundTransparent.Contains(renderQueue)) { return RenderQueueType.BackgroundTransparent; }
 
@@ -120,6 +140,13 @@ namespace HauntedPSX.RenderPipelines.PSX.Runtime
 
                 case RenderQueueType.UIOverlayTransparent:
                     return (int)Priority.UIOverlayTransparent + offset;
+
+                case RenderQueueType.FPSOpaque:
+                    return alphaClip ? (int)Priority.FPSOpaqueAlphaTest : (int)Priority.FPSOpaque;
+
+                case RenderQueueType.FPSTransparent:
+                    return (int)Priority.FPSTransparent + offset;
+
 
                 default:
                     throw new ArgumentException("Unknown RenderQueueType, was " + targetType);

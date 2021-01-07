@@ -13,7 +13,8 @@ namespace HauntedPSX.RenderPipelines.PSX.Editor
         {
             Main = 0,
             Background,
-            UIOverlay
+            UIOverlay,
+            FPS
         }
 
         public enum TextureFilterMode
@@ -779,6 +780,7 @@ namespace HauntedPSX.RenderPipelines.PSX.Editor
                 case RenderQueueCategory.Background: return PSXRenderQueue.ChangeType(transparent ? PSXRenderQueue.RenderQueueType.BackgroundTransparent : PSXRenderQueue.RenderQueueType.BackgroundOpaque, offset, alphaClip);
                 case RenderQueueCategory.Main: return PSXRenderQueue.ChangeType(transparent ? PSXRenderQueue.RenderQueueType.MainTransparent : PSXRenderQueue.RenderQueueType.MainOpaque, offset, alphaClip);
                 case RenderQueueCategory.UIOverlay: return PSXRenderQueue.ChangeType(transparent ? PSXRenderQueue.RenderQueueType.UIOverlayTransparent : PSXRenderQueue.RenderQueueType.UIOverlayOpaque, offset, alphaClip);
+                case RenderQueueCategory.FPS: return PSXRenderQueue.ChangeType(transparent ? PSXRenderQueue.RenderQueueType.FPSTransparent : PSXRenderQueue.RenderQueueType.FPSOpaque, offset, alphaClip);
                 default: throw new ArgumentException("category");
             }
         }
